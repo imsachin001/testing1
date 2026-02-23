@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XYZ University</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Hi student, Welcome to XYZ University!</h1>
+        <p class="subtitle">You can sign up to the platform to access all important notes & lectures.</p>
+        
+        <div class="form-box">
+            <form id="signupForm">
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="email" placeholder="jane@email.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Username:</label>
+                    <input type="text" id="username" placeholder="Jane Doe" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input type="password" id="password" placeholder="password" required>
+                </div>
+                
+                <button type="submit" class="create-btn">Create Account</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            const response = await fetch('/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, username, password })
+            });
+            
+            const data = await response.json();
+            alert(data.message);
+            
+            if (data.success) {
+                document.getElementById('signupForm').reset();
+            }
+        });
+    </script>
+</body>
+</html>

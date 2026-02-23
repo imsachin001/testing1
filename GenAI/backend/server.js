@@ -1,30 +1,42 @@
-// Express backend for Clerk authentication
-// Add your Clerk secret key in .env as CLERK_SECRET_KEY
-
 const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-require('dotenv').config();
+const mongoose = require('mongoose');
+const path = require('path');
 
 const app = express();
-app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Clerk webhook endpoint (example)
-app.post('/clerk/webhook', (req, res) => {
-  // TODO: Validate Clerk webhook signature
-  // Access event data from req.body
-  res.status(200).send('Webhook received');
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/xyzuniversity';
+
+mongoose.connect(MONGO_URI)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch((err) => console.error('MongoDB connection error:', err));
+
+const userSchema = new mongoose.Schema({
+  email: String,
+  username: String,
+  password: String
 });
 
-// Session validation endpoint (example)
-app.post('/clerk/validate-session', (req, res) => {
-  // TODO: Validate Clerk session using CLERK_SECRET_KEY
-  // Access session token from req.body.sessionToken
-  res.status(200).json({ valid: true });
+const User = mongoose.model('User', userSchema);
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-const PORT = process.env.PORT || 5000;
+app.post('/signup', async (req, res) => {
+  try {
+    const { email, username, password } = req.body;
+    const user = new User({ email, username, password });
+    await user.save();
+    console.log('User created:', { email, username, password });
+    res.json({ success: true, message: 'Account created successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error creating account' });
+  }
+});
+
+const PORT = 5000;
 app.listen(PORT, () => {
-  console.log(`Backend running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
